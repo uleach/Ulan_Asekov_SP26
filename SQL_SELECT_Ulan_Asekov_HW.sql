@@ -126,7 +126,24 @@ GROUP BY s.staff_id, s.first_name, s.last_name
 ORDER BY total_revenue DESC
 LIMIT 3;
 
-
+-- Part 2.2: Top 5 most rented movies and expected audience age
+SELECT 
+    f.title, 
+    COUNT(r.rental_id) AS rental_count,
+    CASE 
+        WHEN f.rating = 'G' THEN 'All Ages'
+        WHEN f.rating = 'PG' THEN '8+'
+        WHEN f.rating = 'PG-13' THEN '13+'
+        WHEN f.rating = 'R' THEN '17+'
+        WHEN f.rating = 'NC-17' THEN '18+'
+        ELSE 'Unknown'
+    END AS expected_age_group
+FROM public.film f
+JOIN public.inventory i ON f.film_id = i.film_id
+JOIN public.rental r ON i.inventory_id = r.inventory_id
+GROUP BY f.film_id, f.title, f.rating
+ORDER BY rental_count DESC
+LIMIT 5;
 
 
 
