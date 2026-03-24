@@ -145,5 +145,36 @@ GROUP BY f.film_id, f.title, f.rating
 ORDER BY rental_count DESC
 LIMIT 5;
 
+-- Part 3 V1: Gap between latest release and current year
+SELECT 
+    a.first_name, 
+    a.last_name, 
+    (EXTRACT(YEAR FROM CURRENT_DATE) - MAX(f.release_year)) AS years_since_last_release
+FROM public.actor a
+JOIN public.film_actor fa ON a.actor_id = fa.actor_id
+JOIN public.film f ON fa.film_id = f.film_id
+GROUP BY a.actor_id, a.first_name, a.last_name
+ORDER BY years_since_last_release DESC;
 
+-- Part 3 V2: Maximum gap between sequential films per actor (using self-join)
+SELECT 
+    res.first_name, 
+    res.last_name, 
+    MAX(res.gap) AS longest_gap_years
+FROM (
+    SELECT 
+        a.first_name, 
+        a.last_name, 
+        f1.release_year AS current_film,
+        MIN(f2.release_year) - f1.release_year AS gap
+    FROM public.actor a
+    JOIN public.film_actor fa1 ON a.actor_id = fa1.actor_id
+    JOIN public.film f1 ON fa1.film_id = f1.film_id
+    JOIN public.film_actor fa2 ON a.actor_id = fa2.actor_id
+    JOIN public.film f2 ON fa2.film_id = f2.film_id
+    WHERE f2.release_year > f1.release_year
+    GROUP BY a.actor_id, a.first_name, a.last_name, f1.release_year
+) AS res
+GROUP BY res.first_name, res.last_name
+ORDER BY longest_gap_years DESC;
 
