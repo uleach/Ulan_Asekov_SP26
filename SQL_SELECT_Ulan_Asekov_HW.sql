@@ -106,3 +106,27 @@ JOIN public.category c ON fc.category_id = c.category_id
 WHERE c.name IN ('Drama', 'Travel', 'Documentary')
 GROUP BY f.release_year
 ORDER BY f.release_year DESC;
+
+-- Part 2.1: Top 3 employees by revenue in 2017
+-- Includes the last store they were associated with via their most recent payment.
+SELECT 
+    s.first_name, 
+    s.last_name, 
+    SUM(p.amount) AS total_revenue,
+    (SELECT st.store_id 
+     FROM public.payment p2 
+     JOIN public.staff s2 ON p2.staff_id = s2.staff_id
+     JOIN public.store st ON s2.store_id = st.store_id
+     WHERE s2.staff_id = s.staff_id
+     ORDER BY p2.payment_date DESC LIMIT 1) AS last_store_id
+FROM public.payment p
+JOIN public.staff s ON p.staff_id = s.staff_id
+WHERE p.payment_date BETWEEN '2017-01-01' AND '2017-12-31'
+GROUP BY s.staff_id, s.first_name, s.last_name
+ORDER BY total_revenue DESC
+LIMIT 3;
+
+
+
+
+
