@@ -142,7 +142,15 @@ SELECT
 FROM public.film f
 JOIN public.inventory i ON f.film_id = i.film_id
 JOIN public.rental r ON i.inventory_id = r.inventory_id
-GROUP BY f.film_id, f.title, f.rating
+GROUP BY f.film_id, f.title, 
+    CASE 
+        WHEN f.rating = 'G' THEN 'All Ages'
+        WHEN f.rating = 'PG' THEN '8+'
+        WHEN f.rating = 'PG-13' THEN '13+'
+        WHEN f.rating = 'R' THEN '17+'
+        WHEN f.rating = 'NC-17' THEN '18+'
+        ELSE 'Unknown'
+    END
 ORDER BY rental_count DESC
 LIMIT 5;
 
