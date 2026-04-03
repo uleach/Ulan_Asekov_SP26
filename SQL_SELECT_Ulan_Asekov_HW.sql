@@ -55,7 +55,7 @@ JOIN public.staff s ON p.staff_id = s.staff_id
 JOIN public.store st ON s.store_id = st.store_id
 JOIN public.address a ON st.address_id = a.address_id
 WHERE p.payment_date >= '2017-04-01'
-GROUP BY a.address, a.address2;
+GROUP BY store_id;
 
 -- Subquery variant
 SELECT (SELECT address FROM public.address WHERE address_id = st.address_id) as addr,
