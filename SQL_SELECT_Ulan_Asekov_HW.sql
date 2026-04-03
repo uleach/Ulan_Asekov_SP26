@@ -104,7 +104,7 @@ SELECT
 FROM public.film f
 JOIN public.film_category fc ON f.film_id = fc.film_id
 JOIN public.category c ON fc.category_id = c.category_id
-WHERE c.name IN ('Drama', 'Travel', 'Documentary')
+WHERE LOWER (c.name) IN ('drama', 'travel', 'documentary')
 GROUP BY f.release_year
 ORDER BY f.release_year DESC;
 
