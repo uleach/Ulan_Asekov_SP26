@@ -184,6 +184,6 @@ FROM (
     WHERE f2.release_year > f1.release_year
     GROUP BY a.actor_id, a.first_name, a.last_name, f1.release_year
 ) AS res
-GROUP BY res.first_name, res.last_name
+GROUP BY actor_id
 ORDER BY longest_gap_years DESC;
 
