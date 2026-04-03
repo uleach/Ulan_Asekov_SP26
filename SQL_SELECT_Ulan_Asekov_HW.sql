@@ -38,7 +38,8 @@ AND film_id IN (SELECT film_id FROM public.film_category WHERE category_id = 2);
 WITH store_rev AS (
     SELECT s.store_id, SUM(p.amount) as rev
     FROM public.payment p
-    JOIN public.staff s ON p.staff_id = s.staff_id
+    JOIN public.rental r ON p.rental_id = r.rental_id
+    JOIN public.inventory r ON r.inventory_id = i.inventory_id
     WHERE p.payment_date >= '2017-04-01'
     GROUP BY s.store_id
 )
