@@ -1,0 +1,56 @@
+Task 6: Function Analysis & Questions
+
+1. Function Operations:
+   - film_in_stock: It takes a film_id and store_id and runs a SELECT count on the 
+     inventory table. It checks if the film is not currently 'out' by looking 
+     for a null return_date in the rental table.
+   - film_not_in_stock: Does the opposite of the above; it counts the copies that 
+     are currently rented out and haven't been brought back yet.
+   - inventory_in_stock: This one is used by the others. It returns a boolean 
+     (true/false) to show if a specific piece of inventory is sitting on the shelf.
+   - get_customer_balance: It looks at all the payments a customer made and 
+     compares it to the rental costs. It uses a lot of nested subqueries to 
+     find out if they owe money.
+   - rewards_report: This is a complex function that builds a dynamic string (tmpSQL) 
+     to find customers who spent a certain amount of money last month.
+   - last_day: A simple tool that finds the last date of a month (useful for 
+     billing cycles).
+
+2. Why does ‘rewards_report’ return 0 rows?
+   I looked at the code and it's hardcoded to look for payments in a specific 
+   month. Since the data in this database is from 2007 (and some parts from 2017), 
+   the 'current month' logic in the function finds nothing. To fix it, I'd have 
+   to change the 'last_month_start' variable to match the actual payment dates 
+   in the table.
+
+3. Redundant functions:
+   I think '_group_concat' could be removed. It's used to make lists of names, 
+   but modern Postgres has 'string_agg' which does the same thing much easier. 
+   Keeping old custom functions makes the database messy.
+
+4. Best practices violations:
+   The 'get_customer_balance' function is pretty messy. It doesn't handle 
+   cases where data might be missing (NULLs) very well, which can lead to 
+   wrong balance totals. Also, 'rewards_report' uses dynamic SQL which is 
+   usually avoided unless necessary because of security risks.
+
+5. How group_concat works:
+   It's an aggregate function. It takes values from multiple rows (like 
+   different actors in a film) and squashes them into one string separated 
+   by commas. It's used in the 'film_list' view to show all actors in one cell.
+
+6. The ‘last_updated’ function:
+   This is a trigger function. If you check the 'actor' or 'film' tables, they 
+   have a trigger that calls this function whenever a row is updated. It 
+   just sets the 'last_update' column to the current time automatically.
+
+7. What is tmpSQL for?
+   It's a text variable used to build a query string. The function uses 
+   'EXECUTE tmpSQL' to run it. It could be rewritten as a normal SELECT 
+   statement, which would be easier to read and faster for the database 
+   to plan.
+
+8. Potential for incorrect results:
+   'get_customer_balance' can be wrong because it doesn't always account 
+   for the 'replacement_cost' if a customer never returns a movie. It mostly 
+   just looks at rental fees and payments.
