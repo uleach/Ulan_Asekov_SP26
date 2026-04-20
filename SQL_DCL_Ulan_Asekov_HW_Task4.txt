@@ -1,0 +1,70 @@
+Q1. How can you restrict access to certain columns of a table?
+Column-level privileges
+PostgreSQL lets you grant privileges on specific columns instead of the whole table. This is useful when a table has sensitive columns that only some roles should see.
+
+GRANT SELECT (col1, col2) ON table_name TO role_name;
+GRANT UPDATE (col1)       ON table_name TO role_name;
+
+Example from dvd_rental
+The customer table has an email column that maybe not every role should access. We could give a support role access to names and phone but not email:
+
+GRANT SELECT (customer_id, first_name, last_name, phone, active)
+    ON customer TO support_role;
+
+If support_role then tries to run SELECT email FROM customer, PostgreSQL returns an error. Only the columns listed in the GRANT are accessible.
+
+Alternative: views
+Another way is to create a view that only includes the allowed columns, then grant SELECT on the view instead of the table. Both approaches work — column grants are more flexible when different roles need different columns from the same table.
+
+Q2. What is the difference between identification and authentication?
+The basic idea
+Identification: Claiming who you are — providing a username like "rentaluser".
+Authentication: Proving you are who you claim to be — providing the correct password.
+
+They are two separate steps. Identification just tells the system which account you want to use. Authentication is what actually verifies you have the right to use it.
+
+In dvd_rental
+When rentaluser connects to the database, they provide their username (identification) and password (authentication). If the password is wrong, the connection is rejected even though the username exists.
+
+-- identification: username rentaluser
+-- authentication: password rentalpassword
+psql -h 127.0.0.1 -U rentaluser -d dvdrental
+
+If someone knows the username but not the password, identification succeeds but authentication fails — they do not get in.
+
+Q3. What are the recommended authentication protocols for PostgreSQL?
+ this is my understanding from reading rather than hands-on experience.
+
+scram-sha-256
+This is what the dvd_rental database uses. I can confirm it by running:
+
+SHOW password_encryption;
+-- Output: scram-sha-256
+
+From what I read, scram-sha-256 is the modern and recommended method. The password is never sent directly over the connection — instead a challenge-response exchange happens, so even if someone intercepts the traffic they can't get the actual password. It replaced an older method called md5 which is considered weaker.
+
+peer
+This is what the database uses for local connections. It works by checking the operating system username — if you're logged in as "postgres" on the OS, you're trusted as the postgres database role without needing a password. This only works for local connections, not over a network.
+
+Other methods I read about
+There are other methods like certificate-based auth (using SSL certificates instead of passwords) and LDAP (delegating authentication to a company directory like Active Directory). I haven't used these yet but from what I understand they are used in larger production environments where you want centralised user management.
+
+The main takeaway from my reading is that scram-sha-256 is the safe default for password-based connections, and md5 or trust should be avoided in production.
+
+Q4. What is proxy authentication and why does it help with RBAC?
+
+What I understood from reading about it to answer this question.
+
+Proxy authentication is when an application connects to the database using one shared account, and then switches to a different role for each user's session using SET ROLE. We actually used SET ROLE throughout Tasks 2 and 3 without knowing it had this name.
+
+-- App connects as one account, then switches role
+SET ROLE client_eleanor_hunt;
+SELECT * FROM rental;  -- RLS applies, Eleanor sees only her rows
+RESET ROLE;
+
+Why it helps with RBAC
+From what I read, the main benefit is that the application only needs one set of database credentials instead of one per user. In dvd_rental for example, instead of creating a separate database login for all 599 customers, the app connects as one service account and then uses SET ROLE to switch to the right customer role. The RLS policies we created in Task 3 then automatically filter the data correctly.
+
+I also read that this works well with connection poolers — tools that reuse database connections between requests. If every user had their own database account, pooling would be much more complicated. With proxy auth, the pool always connects as the same account and just switches roles per request.
+
+I think I understand the basic idea but would need more practice to be fully comfortable with how it works in a real application setup.
