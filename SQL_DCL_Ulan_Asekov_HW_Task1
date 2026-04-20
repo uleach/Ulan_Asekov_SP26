@@ -1,0 +1,40 @@
+1. Users and Roles
+SELECT rolname, rolsuper, rolcanlogin, rolconnlimit
+FROM pg_roles ORDER BY rolname;
+
+Result: 17 rows. Only one real user is postgres (rolsuper = true, rolcanlogin = true). The other 16 are built-in PostgreSQL system roles like pg_monitor and pg_read_all_data — none of them can log in. No application-specific roles exist at all.
+
+2. Table-Level Privileges
+SELECT grantee, table_name, privilege_type
+FROM information_schema.role_table_grants
+WHERE table_schema = 'public' AND grantee <> 'postgres'
+ORDER BY table_name;
+
+Result: 0 rows. No role other than postgres has been granted any privilege on any table.
+
+3. Row-Level Security
+SELECT tablename, rowsecurity FROM pg_tables
+WHERE schemaname = 'public';
+
+Result: all 21 tables show rowsecurity = false. RLS is disabled everywhere.
+
+SELECT * FROM pg_policies WHERE schemaname = 'public';
+
+Result: 0 rows. No RLS policies defined anywhere.
+
+4. Is this sufficient?
+The main issues:
+
+Only one account: Everything runs as the postgres superuser. Any application using this connection can drop tables, read staff password hashes, or truncate any data.
+No RLS anywhere: A user with SELECT on payment can read every customer's transaction history. There is no row-level filtering.
+No connection limits: rolconnlimit = -1 on postgres means unlimited connections. A runaway app could exhaust all connections.
+
+5. Identified Vulnerability and Fix
+The biggest problem is using the superuser for everything. The fix is to create a least-privilege application role:
+
+CREATE ROLE app_user LOGIN PASSWORD 'strongpassword';
+GRANT CONNECT ON DATABASE dvdrental TO app_user;
+GRANT USAGE ON SCHEMA public TO app_user;
+GRANT SELECT ON film, category, inventory TO app_user;
+
+This way even if the application is compromised, the attacker only has SELECT on a few catalog tables — not DROP TABLE or access to customer PII.
