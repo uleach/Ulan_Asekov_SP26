@@ -95,6 +95,13 @@ $$ LANGUAGE plpgsql;
 -- Task 4. Film search
 /* I used ILIKE for the %love% pattern. 
   If nothing is found, I return a row saying NOT FOUND.
+   ILIKE is case-insensitive, so '%love%', '%Love%' and '%LOVE%' all return
+   the same results. I chose ILIKE instead of LIKE because film titles in
+   the database are stored in uppercase (for example 'LOVE STORY'), so a regular
+   LIKE '%love%' would return 0 rows even though the film exists.
+   If nothing is found, I return a row saying NOT FOUND instead of an
+   empty result so the the one who runs the quesry knows the search ran but matched nothing.
+*/
 */
 CREATE OR REPLACE FUNCTION core.films_in_stock_by_title(pat text)
 RETURNS TABLE(id bigint, t text, l text) AS $$
