@@ -22,6 +22,22 @@ WHERE extract(quarter from p.payment_date) = extract(quarter from current_date)
 GROUP BY c.name
 HAVING sum(p.amount) > 0;
 
+-- Test 1: current quarter (returns 0 rows on sample data — expected, no 2026 data)
+SELECT * FROM sales_revenue_by_category_qtr;
+
+-- Test 2: verify logic with Q1 2017 data
+SELECT c.name as cat, sum(p.amount) as rev
+FROM payment p
+join rental r on p.rental_id = r.rental_id
+join inventory i on r.inventory_id = i.inventory_id
+join film_category fc on i.film_id = fc.film_id
+join category c on fc.category_id = c.category_id
+WHERE extract(quarter from p.payment_date) = 1
+  AND extract(year from p.payment_date) = 2017
+GROUP BY c.name
+HAVING sum(p.amount) > 0;
+
+
 -- Task 2. Function with parameters
 /* I made this so you can put in any year or quarter.
   I added a check for the quarter because it can only be 1 to 4.
