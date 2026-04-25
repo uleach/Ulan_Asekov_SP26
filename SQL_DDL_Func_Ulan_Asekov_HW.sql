@@ -58,7 +58,9 @@ BEGIN
     join category c on fc.category_id = c.category_id
     WHERE extract(quarter from p.payment_date) = q
       AND extract(year from p.payment_date) = y
-    GROUP BY c.name;
+    GROUP BY c.name
+      HAVING sum(p.amount) > 0;
+
 END;
 $$ LANGUAGE plpgsql;
 
