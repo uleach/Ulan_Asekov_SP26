@@ -335,7 +335,7 @@ INSERT INTO ticket_sale (visitor_id, exhibition_id, sold_by_employee_id, sale_da
  (SELECT employee_id FROM employee WHERE email='amelia.brooks@museum.org'),
  CURRENT_TIMESTAMP - INTERVAL '60 days', 2, 25.00, 'card'),
 
-((SELECT visitor_id FROM visitor WHERE email='aizat.bakirov@example.com'),
+((SELECT visitor_id FROM visitor WHERE email='aizat.bakiruulu@example.com'),
  (SELECT exhibition_id FROM exhibition WHERE title='Abstract Expressionism: A Retrospective'),
  (SELECT employee_id FROM employee WHERE email='aizada.beksultan@museum.org'),
  CURRENT_TIMESTAMP - INTERVAL '45 days', 1, 22.00, 'cash'),
@@ -345,7 +345,7 @@ INSERT INTO ticket_sale (visitor_id, exhibition_id, sold_by_employee_id, sale_da
  (SELECT employee_id FROM employee WHERE email='yuki.tanaka@museum.org'),
  CURRENT_TIMESTAMP - INTERVAL '30 days', 4, 20.00, 'online'),
 
-((SELECT visitor_id FROM visitor WHERE email='begimai.toktorbaeva@example.com'),
+((SELECT visitor_id FROM visitor WHERE email='begimai.toktorbekkyzy@example.com'),
  (SELECT exhibition_id FROM exhibition WHERE title='Dinosaurs Among Us'),
  (SELECT employee_id FROM employee WHERE email='bakyt.toktogulov@museum.org'),
  CURRENT_TIMESTAMP - INTERVAL '20 days', 3, 18.00, 'card'),
@@ -365,12 +365,12 @@ INSERT INTO ticket_sale (visitor_id, exhibition_id, sold_by_employee_id, sale_da
  (SELECT employee_id FROM employee WHERE email='cholpon.asanova@museum.org'),
  CURRENT_TIMESTAMP - INTERVAL '15 days', 3, 18.00, 'card'),
 
-((SELECT visitor_id FROM visitor WHERE email='nurzhan.abdyldaev@example.com'),
+((SELECT visitor_id FROM visitor WHERE email='nurlan.asanuulu@example.com'),
  (SELECT exhibition_id FROM exhibition WHERE title='Silk Road Heritage: Kyrgyz & Central Asian Treasures'),
  (SELECT employee_id FROM employee WHERE email='cholpon.asanova@museum.org'),
  CURRENT_TIMESTAMP - INTERVAL '8 days', 2, 18.00, 'online'),
 
-((SELECT visitor_id FROM visitor WHERE email='begimai.toktorbaeva@example.com'),
+((SELECT visitor_id FROM visitor WHERE email='begimai.toktorbekkyzy@example.com'),
  (SELECT exhibition_id FROM exhibition WHERE title='Nooruz Family Day: Free Children''s Exhibition'),
  (SELECT employee_id FROM employee WHERE email='cholpon.asanova@museum.org'),
  CURRENT_TIMESTAMP - INTERVAL '6 days', 4, 0.00, 'cash');
@@ -500,7 +500,7 @@ $$;
 -- SELECT museum.add_ticket_sale(
 --     'maria.lopez@example.com',
 --     'Dinosaurs Among Us',
---     'robert.singh@museum.org',
+--     bakyt.toktogulov@museum.org,
 --     2::SMALLINT,
 --     'card'
 -- );
